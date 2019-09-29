@@ -1,6 +1,3 @@
-/*
- * Copyright (C) 2019 Baidu, Inc. All Rights Reserved.
- */
 package com.kevin.swipetoloadlayout
 
 import org.junit.Test
