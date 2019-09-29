@@ -1598,7 +1598,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
 
     override fun onNestedScroll(
         target: View, dxConsumed: Int, dyConsumed: Int,
-        dxUnconsumed: Int, dyUnconsumed: Int, @ViewCompat.NestedScrollType type: Int,
+        dxUnconsumed: Int, dyUnconsumed: Int, type: Int,
         consumed: IntArray
     ) {
         if (type != ViewCompat.TYPE_TOUCH) {
@@ -1794,7 +1794,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
 
     override fun dispatchNestedScroll(
         dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int,
-        dyUnconsumed: Int, offsetInWindow: IntArray?, @ViewCompat.NestedScrollType type: Int,
+        dyUnconsumed: Int, offsetInWindow: IntArray?, type: Int,
         consumed: IntArray
     ) {
         if (type == ViewCompat.TYPE_TOUCH) {
