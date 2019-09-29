@@ -263,126 +263,8 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
             }
         }
 
-    private var refreshCallback: RefreshCallback = object : RefreshCallback() {
-        override fun onPrepare() {
-            if (headerView != null
-                && headerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
-            ) {
-                headerView!!.visibility = View.VISIBLE
-                (headerView as SwipeTrigger).onPrepare()
-            }
-        }
-
-        override fun onMove(y: Int, isComplete: Boolean, automatic: Boolean) {
-            if (headerView != null
-                && headerView is SwipeTrigger
-                && SwipeStatus.isRefreshStatus(status)
-            ) {
-                if (headerView!!.visibility != View.VISIBLE) {
-                    headerView!!.visibility = View.VISIBLE
-                }
-                (headerView as SwipeTrigger).onMove(y, isComplete, automatic)
-            }
-        }
-
-        override fun onRelease() {
-            if (headerView != null
-                && headerView is SwipeTrigger
-                && SwipeStatus.isReleaseToRefresh(status)
-            ) {
-                (headerView as SwipeTrigger).onRelease()
-            }
-        }
-
-        override fun onRefresh() {
-            if (headerView != null && SwipeStatus.isRefreshing(status)) {
-                if (headerView is SwipeRefreshTrigger) {
-                    (headerView as SwipeRefreshTrigger).onRefresh()
-                }
-                if (refreshListener != null) {
-                    refreshListener!!.onRefresh()
-                }
-            }
-        }
-
-        override fun onComplete() {
-            if (headerView != null && headerView is SwipeTrigger) {
-                (headerView as SwipeTrigger).onComplete()
-            }
-        }
-
-        override fun onReset() {
-            if (headerView != null
-                && headerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
-            ) {
-                (headerView as SwipeTrigger).onReset()
-                headerView!!.visibility = View.GONE
-            }
-        }
-    }
-
-    private var loadMoreCallback: LoadMoreCallback = object : LoadMoreCallback() {
-
-        override fun onPrepare() {
-            if (footerView != null
-                && footerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
-            ) {
-                footerView!!.visibility = View.VISIBLE
-                (footerView as SwipeTrigger).onPrepare()
-            }
-        }
-
-        override fun onMove(y: Int, isComplete: Boolean, automatic: Boolean) {
-            if (footerView != null
-                && footerView is SwipeTrigger
-                && SwipeStatus.isLoadMoreStatus(status)
-            ) {
-                if (footerView!!.visibility != View.VISIBLE) {
-                    footerView!!.visibility = View.VISIBLE
-                }
-                (footerView as SwipeTrigger).onMove(y, isComplete, automatic)
-            }
-        }
-
-        override fun onRelease() {
-            if (footerView != null
-                && footerView is SwipeTrigger
-                && SwipeStatus.isReleaseToLoadMore(status)
-            ) {
-                (footerView as SwipeTrigger).onRelease()
-            }
-        }
-
-        override fun onLoadMore() {
-            if (footerView != null && SwipeStatus.isLoadingMore(status)) {
-                if (footerView is SwipeLoadMoreTrigger) {
-                    (footerView as SwipeLoadMoreTrigger).onLoadMore()
-                }
-                if (loadMoreListener != null) {
-                    loadMoreListener!!.onLoadMore()
-                }
-            }
-        }
-
-        override fun onComplete() {
-            if (footerView != null && footerView is SwipeTrigger) {
-                (footerView as SwipeTrigger).onComplete()
-            }
-        }
-
-        override fun onReset() {
-            if (footerView != null
-                && footerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
-            ) {
-                (footerView as SwipeTrigger).onReset()
-                footerView!!.visibility = View.GONE
-            }
-        }
-    }
+    private var refreshCallback: RefreshCallback = RefreshCallback()
+    private var loadMoreCallback: LoadMoreCallback = LoadMoreCallback()
 
     private var totalUnconsumed: Float = 0.toFloat()
     private val nestedScrollingParentHelper by lazy { NestedScrollingParentHelper(this) }
@@ -1021,6 +903,18 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     }
 
     /**
+     * Set the current status for better control
+     *
+     * @param status
+     */
+    private fun setStatus(status: Int) {
+        this.status = status
+        if (debug) {
+            SwipeStatus.printStatus(status)
+        }
+    }
+
+    /**
      * copy from [SwipeRefreshLayout.canChildScrollUp]
      *
      * @return Whether it is possible for the child view of this layout to
@@ -1471,12 +1365,128 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     /**
      * refresh event callback
      */
-    internal abstract inner class RefreshCallback : SwipeTrigger, SwipeRefreshTrigger
+    internal inner class RefreshCallback : SwipeTrigger, SwipeRefreshTrigger {
+        override fun onPrepare() {
+            if (headerView != null
+                && headerView is SwipeTrigger
+                && SwipeStatus.isStatusDefault(status)
+            ) {
+                headerView!!.visibility = View.VISIBLE
+                (headerView as SwipeTrigger).onPrepare()
+            }
+        }
+
+        override fun onMove(y: Int, isComplete: Boolean, automatic: Boolean) {
+            if (headerView != null
+                && headerView is SwipeTrigger
+                && SwipeStatus.isRefreshStatus(status)
+            ) {
+                if (headerView!!.visibility != View.VISIBLE) {
+                    headerView!!.visibility = View.VISIBLE
+                }
+                (headerView as SwipeTrigger).onMove(y, isComplete, automatic)
+            }
+        }
+
+        override fun onRelease() {
+            if (headerView != null
+                && headerView is SwipeTrigger
+                && SwipeStatus.isReleaseToRefresh(status)
+            ) {
+                (headerView as SwipeTrigger).onRelease()
+            }
+        }
+
+        override fun onRefresh() {
+            if (headerView != null && SwipeStatus.isRefreshing(status)) {
+                if (headerView is SwipeRefreshTrigger) {
+                    (headerView as SwipeRefreshTrigger).onRefresh()
+                }
+                if (refreshListener != null) {
+                    refreshListener!!.onRefresh()
+                }
+            }
+        }
+
+        override fun onComplete() {
+            if (headerView != null && headerView is SwipeTrigger) {
+                (headerView as SwipeTrigger).onComplete()
+            }
+        }
+
+        override fun onReset() {
+            if (headerView != null
+                && headerView is SwipeTrigger
+                && SwipeStatus.isStatusDefault(status)
+            ) {
+                (headerView as SwipeTrigger).onReset()
+                headerView!!.visibility = View.GONE
+            }
+        }
+    }
 
     /**
      * load more event callback
      */
-    internal abstract inner class LoadMoreCallback : SwipeTrigger, SwipeLoadMoreTrigger
+    private inner class LoadMoreCallback : SwipeTrigger, SwipeLoadMoreTrigger {
+        override fun onPrepare() {
+            if (footerView != null
+                && footerView is SwipeTrigger
+                && SwipeStatus.isStatusDefault(status)
+            ) {
+                footerView!!.visibility = View.VISIBLE
+                (footerView as SwipeTrigger).onPrepare()
+            }
+        }
+
+        override fun onMove(y: Int, isComplete: Boolean, automatic: Boolean) {
+            if (footerView != null
+                && footerView is SwipeTrigger
+                && SwipeStatus.isLoadMoreStatus(status)
+            ) {
+                if (footerView!!.visibility != View.VISIBLE) {
+                    footerView!!.visibility = View.VISIBLE
+                }
+                (footerView as SwipeTrigger).onMove(y, isComplete, automatic)
+            }
+        }
+
+        override fun onRelease() {
+            if (footerView != null
+                && footerView is SwipeTrigger
+                && SwipeStatus.isReleaseToLoadMore(status)
+            ) {
+                (footerView as SwipeTrigger).onRelease()
+            }
+        }
+
+        override fun onLoadMore() {
+            if (footerView != null && SwipeStatus.isLoadingMore(status)) {
+                if (footerView is SwipeLoadMoreTrigger) {
+                    (footerView as SwipeLoadMoreTrigger).onLoadMore()
+                }
+                if (loadMoreListener != null) {
+                    loadMoreListener!!.onLoadMore()
+                }
+            }
+        }
+
+        override fun onComplete() {
+            if (footerView != null && footerView is SwipeTrigger) {
+                (footerView as SwipeTrigger).onComplete()
+            }
+        }
+
+        override fun onReset() {
+            if (footerView != null
+                && footerView is SwipeTrigger
+                && SwipeStatus.isStatusDefault(status)
+            ) {
+                (footerView as SwipeTrigger).onReset()
+                footerView!!.visibility = View.GONE
+            }
+        }
+    }
 
     private inner class AutoScroller : Runnable {
 
@@ -1545,18 +1555,6 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
             scroller.startScroll(0, 0, 0, yScrolled, duration)
             post(this)
             running = true
-        }
-    }
-
-    /**
-     * Set the current status for better control
-     *
-     * @param status
-     */
-    private fun setStatus(status: Int) {
-        this.status = status
-        if (debug) {
-            SwipeStatus.printStatus(status)
         }
     }
 
