@@ -3,10 +3,9 @@ package com.kevin.swipetoloadlayout.sample;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import androidx.appcompat.widget.AppCompatTextView;
-
 import com.kevin.swipetoloadlayout.SwipeRefreshTrigger;
 import com.kevin.swipetoloadlayout.SwipeTrigger;
+import com.kevin.swipetoloadlayout.sample.widget.TwoBallRotationProgressBar;
 
 
 /**
@@ -18,7 +17,7 @@ import com.kevin.swipetoloadlayout.SwipeTrigger;
  * Note: If you modify this class please fill in the following content as a record.
  * @author mender，Modified Date Modify Content:
  */
-public class RefreshHeaderView extends AppCompatTextView implements SwipeRefreshTrigger, SwipeTrigger {
+public class RefreshHeaderView extends TwoBallRotationProgressBar implements SwipeRefreshTrigger, SwipeTrigger {
 
     public RefreshHeaderView(Context context) {
         super(context);
@@ -30,25 +29,15 @@ public class RefreshHeaderView extends AppCompatTextView implements SwipeRefresh
 
     @Override
     public void onRefresh() {
-        setText("REFRESHING");
     }
 
     @Override
     public void onPrepare() {
-        setText("");
+        startAnimator();
     }
 
     @Override
     public void onMove(int yScrolled, boolean isComplete, boolean automatic) {
-        if (!isComplete) {
-            if (yScrolled >= getHeight()) {
-                setText("RELEASE TO REFRESH");
-            } else {
-                setText("SWIPE TO REFRESH");
-            }
-        } else {
-            setText("REFRESH RETURNING");
-        }
     }
 
     @Override
@@ -57,11 +46,10 @@ public class RefreshHeaderView extends AppCompatTextView implements SwipeRefresh
 
     @Override
     public void onComplete() {
-        setText("COMPLETE");
     }
 
     @Override
     public void onReset() {
-        setText("");
+        stopAnimator();
     }
 }

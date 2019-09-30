@@ -6,7 +6,7 @@
 
     <com.kevin.swipetoloadlayout.sample.RefreshHeaderView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="72dp"
         android:gravity="center" />
 
     <androidx.recyclerview.widget.RecyclerView

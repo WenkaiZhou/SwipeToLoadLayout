@@ -1,5 +1,6 @@
 package com.kevin.swipetoloadlayout.sample
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,8 +8,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.appbar.AppBarLayout
 import com.kevin.swipetoloadlayout.OnRefreshListener
 import kotlinx.android.synthetic.main.fragment_personal_notes.*
+import kotlin.math.abs
 
 /**
  * PersonalNotesFragment
