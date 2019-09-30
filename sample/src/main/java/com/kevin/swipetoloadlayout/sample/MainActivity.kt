@@ -1,5 +1,6 @@
 package com.kevin.swipetoloadlayout.sample
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.jaeger.library.StatusBarUtil
@@ -20,8 +21,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        immersiveBuilder
-            .useNavigationBar().useStatusBar().apply()
-//        StatusBarUtil.setTranslucent(this)
+        immersiveBuilder.useStatusBar()
+            .statusBarColorHint(Color.WHITE)
+            .apply()
     }
 }
