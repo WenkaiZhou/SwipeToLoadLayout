@@ -38,4 +38,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0-alpha10'
 
     implementation 'com.kevin:slidingtablayout:2.0.0'
+
+    implementation 'com.kevin:delegationadapter:2.0.0'
+    implementation 'com.kevin:delegationadapter-extras:2.0.0'
 }
