@@ -68,9 +68,9 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     private val touchSlop: Int
 
     /**
-     * status of SwipeToLoadLayout
+     * state of SwipeToLoadLayout
      */
-    private var status = SwipeStatus.STATUS_DEFAULT
+    private var state = SwipeState.STATE_DEFAULT
 
     /**
      * target view top offset
@@ -156,7 +156,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         DEFAULT_SWIPING_TO_REFRESH_TO_DEFAULT_SCROLLING_DURATION
 
     /**
-     * Scrolling duration status release to refresh -> refreshing
+     * Scrolling duration state release to refresh -> refreshing
      */
     private var releaseToRefreshToRefreshingScrollingDuration =
         DEFAULT_RELEASE_TO_REFRESHING_SCROLLING_DURATION
@@ -167,21 +167,21 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     private var refreshCompleteDelayDuration = DEFAULT_REFRESH_COMPLETE_DELAY_DURATION
 
     /**
-     * Scrolling duration status refresh complete -> default
+     * Scrolling duration state refresh complete -> default
      * [.setRefreshing] false
      */
     private var refreshCompleteToDefaultScrollingDuration =
         DEFAULT_REFRESH_COMPLETE_TO_DEFAULT_SCROLLING_DURATION
 
     /**
-     * Scrolling duration status default -> refreshing, mainly for auto refresh
+     * Scrolling duration state default -> refreshing, mainly for auto refresh
      * [.setRefreshing] true
      */
     private var defaultToRefreshingScrollingDuration =
         DEFAULT_DEFAULT_TO_REFRESHING_SCROLLING_DURATION
 
     /**
-     * Scrolling duration status release to loading more -> loading more
+     * Scrolling duration state release to loading more -> loading more
      */
     private var releaseToLoadMoreToLoadingMoreScrollingDuration =
         DEFAULT_RELEASE_TO_LOADING_MORE_SCROLLING_DURATION
@@ -192,7 +192,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     private var loadMoreCompleteDelayDuration = DEFAULT_LOAD_MORE_COMPLETE_DELAY_DURATION
 
     /**
-     * Scrolling duration status load more complete -> default
+     * Scrolling duration state load more complete -> default
      * [.setLoadingMore] false
      */
     private var loadMoreCompleteToDefaultScrollingDuration =
@@ -205,29 +205,29 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         DEFAULT_SWIPING_TO_LOAD_MORE_TO_DEFAULT_SCROLLING_DURATION
 
     /**
-     * Scrolling duration status default -> loading more, mainly for auto load more
+     * Scrolling duration state default -> loading more, mainly for auto load more
      * [.setLoadingMore] true
      */
     private var defaultToLoadingMoreScrollingDuration =
         DEFAULT_DEFAULT_TO_LOADING_MORE_SCROLLING_DURATION
 
     /**
-     * is current status refreshing
+     * is current state refreshing
      */
     var isRefreshing: Boolean
-        get() = SwipeStatus.isRefreshing(status)
+        get() = SwipeState.isRefreshing(state)
         set(refreshing) {
             if (!isRefreshEnabled || headerView == null) {
                 return
             }
             this.autoLoading = refreshing
             if (refreshing) {
-                if (SwipeStatus.isStatusDefault(status)) {
-                    setStatus(SwipeStatus.STATUS_SWIPING_TO_REFRESH)
+                if (SwipeState.isStateDefault(state)) {
+                    setState(SwipeState.STATE_SWIPING_TO_REFRESH)
                     scrollDefaultToRefreshing()
                 }
             } else {
-                if (SwipeStatus.isRefreshing(status)) {
+                if (SwipeState.isRefreshing(state)) {
                     refreshCallback.onComplete()
                     postDelayed(
                         { scrollRefreshingToDefault() },
@@ -238,22 +238,22 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         }
 
     /**
-     *  is current status loading more
+     *  is current state loading more
      */
     var isLoadingMore: Boolean
-        get() = SwipeStatus.isLoadingMore(status)
+        get() = SwipeState.isLoadingMore(state)
         set(loadingMore) {
             if (!isLoadMoreEnabled || footerView == null) {
                 return
             }
             this.autoLoading = loadingMore
             if (loadingMore) {
-                if (SwipeStatus.isStatusDefault(status)) {
-                    setStatus(SwipeStatus.STATUS_SWIPING_TO_LOAD_MORE)
+                if (SwipeState.isStateDefault(state)) {
+                    setState(SwipeState.STATE_SWIPING_TO_LOAD_MORE)
                     scrollDefaultToLoadingMore()
                 }
             } else {
-                if (SwipeStatus.isLoadingMore(status)) {
+                if (SwipeState.isLoadingMore(state)) {
                     loadMoreCallback.onComplete()
                     postDelayed(
                         { scrollLoadingMoreToDefault() },
@@ -472,7 +472,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         when (MotionEventCompat.getActionMasked(ev)) {
             MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP ->
-                // swipeToRefresh -> finger up -> finger down if the status is still swipeToRefresh
+                // swipeToRefresh -> finger up -> finger down if the state is still swipeToRefresh
                 // in onInterceptTouchEvent ACTION_DOWN event will stop the scroller
                 // if the event pass to the child view while ACTION_MOVE(condition is false)
                 // in onInterceptTouchEvent ACTION_MOVE the ACTION_UP or ACTION_CANCEL will not be
@@ -495,12 +495,12 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
                 lastX = getMotionEventX(event, activePointerId)
                 initDownX = lastX
 
-                // if it isn't an ing status or default status
-                if (SwipeStatus.isSwipingToRefresh(status) || SwipeStatus.isSwipingToLoadMore(
-                        status
+                // if it isn't an ing state or default state
+                if (SwipeState.isSwipingToRefresh(state) || SwipeState.isSwipingToLoadMore(
+                        state
                     ) ||
-                    SwipeStatus.isReleaseToRefresh(status) || SwipeStatus.isReleaseToLoadMore(
-                        status
+                    SwipeState.isReleaseToRefresh(state) || SwipeState.isReleaseToLoadMore(
+                        state
                     )
                 ) {
                     // abort autoScrolling, not trigger the method #autoScrollFinished()
@@ -513,11 +513,11 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
                     }
                 }
 
-                if (SwipeStatus.isSwipingToRefresh(status) || SwipeStatus.isReleaseToRefresh(
-                        status
+                if (SwipeState.isSwipingToRefresh(state) || SwipeState.isReleaseToRefresh(
+                        state
                     )
-                    || SwipeStatus.isSwipingToLoadMore(status) || SwipeStatus.isReleaseToLoadMore(
-                        status
+                    || SwipeState.isSwipingToLoadMore(state) || SwipeState.isReleaseToLoadMore(
+                        state
                     )
                 ) {
                     return true
@@ -628,47 +628,47 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
      * @return success
      */
     private fun moveView(yDiff: Float): Boolean {
-        if (SwipeStatus.isStatusDefault(status)) {
+        if (SwipeState.isStateDefault(state)) {
             if (yDiff > 0 && onCheckCanRefresh()) {
                 refreshCallback.onPrepare()
-                setStatus(SwipeStatus.STATUS_SWIPING_TO_REFRESH)
+                setState(SwipeState.STATE_SWIPING_TO_REFRESH)
             } else if (yDiff < 0 && onCheckCanLoadMore()) {
                 loadMoreCallback.onPrepare()
-                setStatus(SwipeStatus.STATUS_SWIPING_TO_LOAD_MORE)
+                setState(SwipeState.STATE_SWIPING_TO_LOAD_MORE)
             }
-        } else if (SwipeStatus.isRefreshStatus(status)) {
+        } else if (SwipeState.isRefreshState(state)) {
             if (targetOffset <= 0) {
-                setStatus(SwipeStatus.STATUS_DEFAULT)
+                setState(SwipeState.STATE_DEFAULT)
                 fixCurrentStatusLayout()
                 return false
             }
-        } else if (SwipeStatus.isLoadMoreStatus(status)) {
+        } else if (SwipeState.isLoadMoreState(state)) {
             if (targetOffset >= 0) {
-                setStatus(SwipeStatus.STATUS_DEFAULT)
+                setState(SwipeState.STATE_DEFAULT)
                 fixCurrentStatusLayout()
                 return false
             }
         }
 
-        if (SwipeStatus.isRefreshStatus(status)) {
-            if (SwipeStatus.isSwipingToRefresh(status)
-                || SwipeStatus.isReleaseToRefresh(status)
+        if (SwipeState.isRefreshState(state)) {
+            if (SwipeState.isSwipingToRefresh(state)
+                || SwipeState.isReleaseToRefresh(state)
             ) {
                 if (targetOffset >= refreshTriggerOffset) {
-                    setStatus(SwipeStatus.STATUS_RELEASE_TO_REFRESH)
+                    setState(SwipeState.STATE_RELEASE_TO_REFRESH)
                 } else {
-                    setStatus(SwipeStatus.STATUS_SWIPING_TO_REFRESH)
+                    setState(SwipeState.STATE_SWIPING_TO_REFRESH)
                 }
                 fingerScroll(yDiff)
             }
-        } else if (SwipeStatus.isLoadMoreStatus(status)) {
-            if (SwipeStatus.isSwipingToLoadMore(status)
-                || SwipeStatus.isReleaseToLoadMore(status)
+        } else if (SwipeState.isLoadMoreState(state)) {
+            if (SwipeState.isSwipingToLoadMore(state)
+                || SwipeState.isReleaseToLoadMore(state)
             ) {
                 if (-targetOffset >= loadMoreTriggerOffset) {
-                    setStatus(SwipeStatus.STATUS_RELEASE_TO_LOAD_MORE)
+                    setState(SwipeState.STATE_RELEASE_TO_LOAD_MORE)
                 } else {
-                    setStatus(SwipeStatus.STATUS_SWIPING_TO_LOAD_MORE)
+                    setState(SwipeState.STATE_SWIPING_TO_LOAD_MORE)
                 }
                 fingerScroll(yDiff)
             }
@@ -903,14 +903,14 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     }
 
     /**
-     * Set the current status for better control
+     * Set the current state for better control
      *
-     * @param status
+     * @param state
      */
-    private fun setStatus(status: Int) {
-        this.status = status
+    private fun setState(state: Int) {
+        this.state = state
         if (debug) {
-            SwipeStatus.printStatus(status)
+            SwipeState.printState(state)
         }
     }
 
@@ -1024,15 +1024,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
             }
             val targetRight = targetLeft + targetView.measuredWidth
             val targetBottom = targetTop + targetView.measuredHeight
-
-//            //make the scrollable targetView show the loaded items
-//            if (SwipeStatus.isLoadingMore(status)) {
-//                val scroll = targetTop - targetView.top
-//                if (scroll != 0 && canChildScrollUp()) {
-//                    targetView.scrollBy(0, scroll)
-//                }
-//            }
-
+            
             targetView.layout(targetLeft, targetTop, targetRight, targetBottom)
         }
 
@@ -1085,21 +1077,21 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
 
     private fun fixCurrentStatusLayout() {
         when {
-            SwipeStatus.isRefreshing(status) -> {
+            SwipeState.isRefreshing(state) -> {
                 targetOffset = (refreshTriggerOffset + 0.5f).toInt()
                 headerOffset = targetOffset
                 footerOffset = 0
                 layoutChildren()
                 invalidate()
             }
-            SwipeStatus.isStatusDefault(status) -> {
+            SwipeState.isStateDefault(state) -> {
                 targetOffset = 0
                 headerOffset = 0
                 footerOffset = 0
                 layoutChildren()
                 invalidate()
             }
-            SwipeStatus.isLoadingMore(status) -> {
+            SwipeState.isLoadingMore(state) -> {
                 targetOffset = -(loadMoreTriggerOffset + 0.5f).toInt()
                 headerOffset = 0
                 footerOffset = targetOffset
@@ -1118,10 +1110,10 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         val ratio = dragRatio
         var yScrolled = yDiff * ratio
 
-        // make sure (targetOffset>0 -> targetOffset=0 -> default status)
-        // or (targetOffset<0 -> targetOffset=0 -> default status)
-        // forbidden fling (targetOffset>0 -> targetOffset=0 ->targetOffset<0 -> default status)
-        // or (targetOffset<0 -> targetOffset=0 ->targetOffset>0 -> default status)
+        // make sure (targetOffset>0 -> targetOffset=0 -> default state)
+        // or (targetOffset<0 -> targetOffset=0 -> default state)
+        // forbidden fling (targetOffset>0 -> targetOffset=0 ->targetOffset<0 -> default state)
+        // or (targetOffset<0 -> targetOffset=0 ->targetOffset>0 -> default state)
         // I am so smart :)
 
         val tmpTargetOffset = yScrolled + targetOffset
@@ -1136,9 +1128,9 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
             yScrolled = -loadMoreFinalDragOffset - targetOffset
         }
 
-        if (SwipeStatus.isRefreshStatus(status)) {
+        if (SwipeState.isRefreshState(state)) {
             refreshCallback.onMove(targetOffset, isComplete = false, automatic = false)
-        } else if (SwipeStatus.isLoadMoreStatus(status)) {
+        } else if (SwipeState.isLoadMoreState(state)) {
             loadMoreCallback.onMove(targetOffset, isComplete = false, automatic = false)
         }
         updateScroll(yScrolled)
@@ -1146,17 +1138,17 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
 
     private fun autoScroll(yScrolled: Float) {
         when {
-            SwipeStatus.isSwipingToRefresh(status) ->
+            SwipeState.isSwipingToRefresh(state) ->
                 refreshCallback.onMove(targetOffset, isComplete = false, automatic = true)
-            SwipeStatus.isReleaseToRefresh(status) ->
+            SwipeState.isReleaseToRefresh(state) ->
                 refreshCallback.onMove(targetOffset, isComplete = false, automatic = true)
-            SwipeStatus.isRefreshing(status) ->
+            SwipeState.isRefreshing(state) ->
                 refreshCallback.onMove(targetOffset, isComplete = true, automatic = true)
-            SwipeStatus.isSwipingToLoadMore(status) ->
+            SwipeState.isSwipingToLoadMore(state) ->
                 loadMoreCallback.onMove(targetOffset, isComplete = false, automatic = true)
-            SwipeStatus.isReleaseToLoadMore(status) ->
+            SwipeState.isReleaseToLoadMore(state) ->
                 loadMoreCallback.onMove(targetOffset, isComplete = false, automatic = true)
-            SwipeStatus.isLoadingMore(status) ->
+            SwipeState.isLoadingMore(state) ->
                 loadMoreCallback.onMove(targetOffset, isComplete = true, automatic = true)
         }
         updateScroll(yScrolled)
@@ -1174,10 +1166,10 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         }
         targetOffset += yScrolled.toInt()
 
-        if (SwipeStatus.isRefreshStatus(status)) {
+        if (SwipeState.isRefreshState(state)) {
             headerOffset = targetOffset
             footerOffset = 0
-        } else if (SwipeStatus.isLoadMoreStatus(status)) {
+        } else if (SwipeState.isLoadMoreState(state)) {
             footerOffset = targetOffset
             headerOffset = 0
         }
@@ -1194,18 +1186,18 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
      */
     private fun onActivePointerUp() {
         when {
-            SwipeStatus.isSwipingToRefresh(status) ->
+            SwipeState.isSwipingToRefresh(state) ->
                 // simply return
                 scrollSwipingToRefreshToDefault()
-            SwipeStatus.isSwipingToLoadMore(status) ->
+            SwipeState.isSwipingToLoadMore(state) ->
                 // simply return
                 scrollSwipingToLoadMoreToDefault()
-            SwipeStatus.isReleaseToRefresh(status) -> {
+            SwipeState.isReleaseToRefresh(state) -> {
                 // return to header height and perform refresh
                 refreshCallback.onRelease()
                 scrollReleaseToRefreshToRefreshing()
             }
-            SwipeStatus.isReleaseToLoadMore(status) -> {
+            SwipeState.isReleaseToLoadMore(state) -> {
                 // return to footer height and perform loadMore
                 loadMoreCallback.onRelease()
                 scrollReleaseToLoadMoreToLoadingMore()
@@ -1277,56 +1269,56 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
      * invoke when [AutoScroller.finish] is automatic
      */
     private fun autoScrollFinished() {
-        val mLastStatus = status
+        val mLastStatus = state
 
-        if (SwipeStatus.isReleaseToRefresh(status)) {
-            setStatus(SwipeStatus.STATUS_REFRESHING)
+        if (SwipeState.isReleaseToRefresh(state)) {
+            setState(SwipeState.STATE_REFRESHING)
             fixCurrentStatusLayout()
             refreshCallback.onRefresh()
 
-        } else if (SwipeStatus.isRefreshing(status)) {
-            setStatus(SwipeStatus.STATUS_DEFAULT)
+        } else if (SwipeState.isRefreshing(state)) {
+            setState(SwipeState.STATE_DEFAULT)
             fixCurrentStatusLayout()
             refreshCallback.onReset()
 
-        } else if (SwipeStatus.isSwipingToRefresh(status)) {
+        } else if (SwipeState.isSwipingToRefresh(state)) {
             if (autoLoading) {
                 autoLoading = false
-                setStatus(SwipeStatus.STATUS_REFRESHING)
+                setState(SwipeState.STATE_REFRESHING)
                 fixCurrentStatusLayout()
                 refreshCallback.onRefresh()
             } else {
-                setStatus(SwipeStatus.STATUS_DEFAULT)
+                setState(SwipeState.STATE_DEFAULT)
                 fixCurrentStatusLayout()
                 refreshCallback.onReset()
             }
-        } else if (SwipeStatus.isStatusDefault(status)) {
+        } else if (SwipeState.isStateDefault(state)) {
 
-        } else if (SwipeStatus.isSwipingToLoadMore(status)) {
+        } else if (SwipeState.isSwipingToLoadMore(state)) {
             if (autoLoading) {
                 autoLoading = false
-                setStatus(SwipeStatus.STATUS_LOADING_MORE)
+                setState(SwipeState.STATE_LOADING_MORE)
                 fixCurrentStatusLayout()
                 loadMoreCallback.onLoadMore()
             } else {
-                setStatus(SwipeStatus.STATUS_DEFAULT)
+                setState(SwipeState.STATE_DEFAULT)
                 fixCurrentStatusLayout()
                 loadMoreCallback.onReset()
             }
-        } else if (SwipeStatus.isLoadingMore(status)) {
-            setStatus(SwipeStatus.STATUS_DEFAULT)
+        } else if (SwipeState.isLoadingMore(state)) {
+            setState(SwipeState.STATE_DEFAULT)
             fixCurrentStatusLayout()
             loadMoreCallback.onReset()
-        } else if (SwipeStatus.isReleaseToLoadMore(status)) {
-            setStatus(SwipeStatus.STATUS_LOADING_MORE)
+        } else if (SwipeState.isReleaseToLoadMore(state)) {
+            setState(SwipeState.STATE_LOADING_MORE)
             fixCurrentStatusLayout()
             loadMoreCallback.onLoadMore()
         } else {
-            throw IllegalStateException("illegal state: " + SwipeStatus.getStatus(status))
+            throw IllegalStateException("illegal state: " + SwipeState.getState(state))
         }
 
         if (debug) {
-            Log.i(TAG, SwipeStatus.getStatus(mLastStatus) + " -> " + SwipeStatus.getStatus(status))
+            Log.i(TAG, SwipeState.getState(mLastStatus) + " -> " + SwipeState.getState(state))
         }
     }
 
@@ -1369,7 +1361,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onPrepare() {
             if (headerView != null
                 && headerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
+                && SwipeState.isStateDefault(state)
             ) {
                 headerView!!.visibility = View.VISIBLE
                 (headerView as SwipeTrigger).onPrepare()
@@ -1379,7 +1371,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onMove(y: Int, isComplete: Boolean, automatic: Boolean) {
             if (headerView != null
                 && headerView is SwipeTrigger
-                && SwipeStatus.isRefreshStatus(status)
+                && SwipeState.isRefreshState(state)
             ) {
                 if (headerView!!.visibility != View.VISIBLE) {
                     headerView!!.visibility = View.VISIBLE
@@ -1391,14 +1383,14 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onRelease() {
             if (headerView != null
                 && headerView is SwipeTrigger
-                && SwipeStatus.isReleaseToRefresh(status)
+                && SwipeState.isReleaseToRefresh(state)
             ) {
                 (headerView as SwipeTrigger).onRelease()
             }
         }
 
         override fun onRefresh() {
-            if (headerView != null && SwipeStatus.isRefreshing(status)) {
+            if (headerView != null && SwipeState.isRefreshing(state)) {
                 if (headerView is SwipeRefreshTrigger) {
                     (headerView as SwipeRefreshTrigger).onRefresh()
                 }
@@ -1417,7 +1409,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onReset() {
             if (headerView != null
                 && headerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
+                && SwipeState.isStateDefault(state)
             ) {
                 (headerView as SwipeTrigger).onReset()
                 headerView!!.visibility = View.GONE
@@ -1432,7 +1424,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onPrepare() {
             if (footerView != null
                 && footerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
+                && SwipeState.isStateDefault(state)
             ) {
                 footerView!!.visibility = View.VISIBLE
                 (footerView as SwipeTrigger).onPrepare()
@@ -1442,7 +1434,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onMove(y: Int, isComplete: Boolean, automatic: Boolean) {
             if (footerView != null
                 && footerView is SwipeTrigger
-                && SwipeStatus.isLoadMoreStatus(status)
+                && SwipeState.isLoadMoreState(state)
             ) {
                 if (footerView!!.visibility != View.VISIBLE) {
                     footerView!!.visibility = View.VISIBLE
@@ -1454,14 +1446,14 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onRelease() {
             if (footerView != null
                 && footerView is SwipeTrigger
-                && SwipeStatus.isReleaseToLoadMore(status)
+                && SwipeState.isReleaseToLoadMore(state)
             ) {
                 (footerView as SwipeTrigger).onRelease()
             }
         }
 
         override fun onLoadMore() {
-            if (footerView != null && SwipeStatus.isLoadingMore(status)) {
+            if (footerView != null && SwipeState.isLoadingMore(state)) {
                 if (footerView is SwipeLoadMoreTrigger) {
                     (footerView as SwipeLoadMoreTrigger).onLoadMore()
                 }
@@ -1480,7 +1472,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         override fun onReset() {
             if (footerView != null
                 && footerView is SwipeTrigger
-                && SwipeStatus.isStatusDefault(status)
+                && SwipeState.isStateDefault(state)
             ) {
                 (footerView as SwipeTrigger).onReset()
                 footerView!!.visibility = View.GONE
