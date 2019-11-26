@@ -16,6 +16,7 @@
 package com.kevin.swipetoloadlayout
 
 import android.content.Context
+import android.support.v4.view.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -24,12 +25,6 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.Scroller
-import androidx.core.view.NestedScrollingChild3
-import androidx.core.view.NestedScrollingChildHelper
-import androidx.core.view.NestedScrollingParent3
-import androidx.core.view.NestedScrollingParentHelper
-import androidx.core.view.MotionEventCompat
-import androidx.core.view.ViewCompat
 import kotlin.math.abs
 
 /**
@@ -46,7 +41,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ViewGroup(context, attrs, defStyleAttr), NestedScrollingParent3, NestedScrollingChild3 {
+) : ViewGroup(context, attrs, defStyleAttr), NestedScrollingParent2, NestedScrollingChild2 {
 
     private val autoScroller: AutoScroller
 
@@ -1601,7 +1596,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
 
     // NestedScrollingParent 3
 
-    override fun onNestedScroll(
+    private fun onNestedScroll(
         target: View, dxConsumed: Int, dyConsumed: Int,
         dxUnconsumed: Int, dyUnconsumed: Int, type: Int,
         consumed: IntArray
@@ -1797,7 +1792,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
 
     // NestedScrollingChild 3
 
-    override fun dispatchNestedScroll(
+    private fun dispatchNestedScroll(
         dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int,
         dyUnconsumed: Int, offsetInWindow: IntArray?, type: Int,
         consumed: IntArray
@@ -1805,7 +1800,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         if (type == ViewCompat.TYPE_TOUCH) {
             nestedScrollingChildHelper.dispatchNestedScroll(
                 dxConsumed, dyConsumed, dxUnconsumed,
-                dyUnconsumed, offsetInWindow, type, consumed
+                dyUnconsumed, offsetInWindow, type
             )
         }
     }

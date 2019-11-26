@@ -7,12 +7,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
-
-import androidx.annotation.ColorInt;
 
 /**
  * TwoBallRotationProgressBar
@@ -101,8 +99,6 @@ public class TwoBallRotationProgressBar extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mCenterX = getWidth() / 2;
         mCenterY = getHeight() / 2;
-        Log.e("fuck", "getWidth() : " + getWidth());
-        Log.e("fuck", "getHeight() : " + getHeight());
     }
 
     @Override
