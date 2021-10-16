@@ -2,11 +2,12 @@ package com.kevin.swipetoloadlayout.sample;
 
 import android.graphics.Color;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.graphics.ColorUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.core.graphics.ColorUtils;
 
 /**
  * 沉浸式体验构造

@@ -16,7 +16,6 @@
 package com.kevin.swipetoloadlayout
 
 import android.content.Context
-import android.support.v4.view.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -25,6 +24,7 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.Scroller
+import androidx.core.view.*
 import kotlin.math.abs
 
 /**

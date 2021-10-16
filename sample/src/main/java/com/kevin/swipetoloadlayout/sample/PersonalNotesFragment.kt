@@ -1,12 +1,12 @@
 package com.kevin.swipetoloadlayout.sample
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.kevin.delegationadapter.extras.load.LoadDelegationAdapter
 import com.kevin.swipetoloadlayout.OnRefreshListener
 import kotlinx.android.synthetic.main.fragment_personal_notes.*
@@ -88,7 +88,7 @@ class PersonalNotesFragment : Fragment() {
         delegationAdapter.setOnLoadListener(object : LoadDelegationAdapter.OnLoadListener {
             override fun onLoadMore() {
                 recyclerView.postDelayed({
-                    delegationAdapter.setLoading(false)
+                    delegationAdapter.isLoading = false
                     if (count == 2) {
                         // 模拟加载失败
                         delegationAdapter.setLoadFailed()
