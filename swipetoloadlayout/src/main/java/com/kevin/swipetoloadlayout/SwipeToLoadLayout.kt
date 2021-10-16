@@ -22,7 +22,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
-import android.widget.AbsListView
 import android.widget.Scroller
 import androidx.core.view.*
 import kotlin.math.abs
@@ -931,18 +930,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
      * scroll up. Override this if the child view is a custom view.
      */
     fun canChildScrollUp(): Boolean {
-        return if (android.os.Build.VERSION.SDK_INT < 14) {
-            if (targetView is AbsListView) {
-                val absListView = targetView as AbsListView?
-                absListView!!.childCount > 0 && (absListView.firstVisiblePosition > 0 || absListView.getChildAt(
-                    0
-                ).top < absListView.paddingTop)
-            } else {
-                ViewCompat.canScrollVertically(targetView, -1) || targetView!!.scrollY > 0
-            }
-        } else {
-            ViewCompat.canScrollVertically(targetView, -1)
-        }
+        return ViewCompat.canScrollVertically(targetView, -1)
     }
 
     /**
@@ -952,18 +940,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
      * @return
      */
     fun canChildScrollDown(): Boolean {
-        return if (android.os.Build.VERSION.SDK_INT < 14) {
-            if (targetView is AbsListView) {
-                val absListView = targetView as AbsListView?
-                absListView!!.childCount > 0 && (absListView.lastVisiblePosition < absListView.childCount - 1 || absListView.getChildAt(
-                    absListView.childCount - 1
-                ).bottom > absListView.paddingBottom)
-            } else {
-                ViewCompat.canScrollVertically(targetView, 1) || targetView!!.scrollY < 0
-            }
-        } else {
-            ViewCompat.canScrollVertically(targetView, 1)
-        }
+        return ViewCompat.canScrollVertically(targetView, 1)
     }
 
     /**
