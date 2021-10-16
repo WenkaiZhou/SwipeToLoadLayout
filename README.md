@@ -6,7 +6,7 @@
 
 Androidx
 ```
-implementation 'com.kevin:swipetoloadlayout:1.0.0'
+implementation 'com.zwenkai:swipetoloadlayout:2.0.0'
 ```
 
 support
