@@ -1,2 +1,0 @@
-include ':sample', ':swipetoloadlayout'
-rootProject.name='SwipeToLoadLayout'

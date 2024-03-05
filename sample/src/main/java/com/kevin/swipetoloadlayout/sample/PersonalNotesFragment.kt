@@ -7,9 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.kevin.delegationadapter.extras.load.LoadDelegationAdapter
 import com.kevin.swipetoloadlayout.OnRefreshListener
-import kotlinx.android.synthetic.main.fragment_personal_notes.*
+import com.kevin.swipetoloadlayout.SwipeToLoadLayout
 import java.util.*
 
 /**
@@ -23,6 +24,9 @@ import java.util.*
  */
 class PersonalNotesFragment : Fragment() {
 
+    private lateinit var swipeToLoadLayout: SwipeToLoadLayout
+    private lateinit var recyclerView: RecyclerView
+
     private lateinit var delegationAdapter: LoadDelegationAdapter
 
     private var lastId = 0
@@ -34,12 +38,14 @@ class PersonalNotesFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return inflater.inflate(R.layout.fragment_personal_notes, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        swipeToLoadLayout = view.findViewById(R.id.swipeToLoadLayout)
+        recyclerView = view.findViewById(R.id.recycler_view)
 
         // 初始化刷新控件
         initRefreshView()
@@ -70,7 +76,7 @@ class PersonalNotesFragment : Fragment() {
 
     private fun initRecyclerView() {
         // 设置LayoutManager
-        val recyclerView = recycler_view
+        val recyclerView = recyclerView
         val layoutManager = LinearLayoutManager(context)
         recyclerView.layoutManager = layoutManager
         recyclerView.itemAnimator = DefaultItemAnimator()
@@ -84,7 +90,7 @@ class PersonalNotesFragment : Fragment() {
     }
 
     private fun initLoadMore() {
-        val recyclerView = recycler_view
+        val recyclerView = recyclerView
         delegationAdapter.setOnLoadListener(object : LoadDelegationAdapter.OnLoadListener {
             override fun onLoadMore() {
                 recyclerView.postDelayed({
