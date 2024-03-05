@@ -1467,6 +1467,11 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         }
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        autoScroller.abortIfRunning()
+    }
+
     private inner class AutoScroller : Runnable {
 
         private val scroller: Scroller = Scroller(context)
