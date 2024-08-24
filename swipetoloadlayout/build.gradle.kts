@@ -28,10 +28,4 @@ dependencies {
 }
 
 // Release maven configuration
-setProperty("POM_ARTIFACT_ID", "swipetoloadlayout")
-setProperty("POM_NAME", "SwipeToLoadLayout")
-setProperty("VERSION_CODE", "3")
-setProperty("VERSION_NAME", "2.0.1")
-setProperty("POM_DESCRIPTION", "SwipeToLoadLayout")
-
 apply(plugin = "com.vanniktech.maven.publish")
