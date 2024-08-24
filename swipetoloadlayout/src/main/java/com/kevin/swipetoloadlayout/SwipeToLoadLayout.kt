@@ -23,7 +23,12 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.Scroller
-import androidx.core.view.*
+import androidx.core.view.MotionEventCompat
+import androidx.core.view.NestedScrollingChild2
+import androidx.core.view.NestedScrollingChildHelper
+import androidx.core.view.NestedScrollingParent2
+import androidx.core.view.NestedScrollingParentHelper
+import androidx.core.view.ViewCompat
 import kotlin.math.abs
 
 /**
@@ -362,6 +367,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
                     )
             }
         }
+        a.recycle()
 
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop
         autoScroller = AutoScroller()
@@ -372,8 +378,9 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         when (childCount) {
-            1 ->
+            1 -> {
                 targetView = getChildAt(0)
+            }
             2 -> {
                 val firstChild = getChildAt(0)
                 val secondChild = getChildAt(1)
@@ -390,8 +397,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
                 targetView = getChildAt(1)
                 footerView = getChildAt(2)
             }
-            else ->
-                throw IllegalStateException("Children num must equal or less than 3.")
+            else -> throw IllegalStateException("Children num must equal or less than 3.")
         }
 
         checkNotNull(targetView) { "The child content view must not be null." }
@@ -447,7 +453,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
      */
     class LayoutParams : MarginLayoutParams {
 
-        constructor(c: Context, attrs: AttributeSet) : super(c, attrs)
+        constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
         constructor(width: Int, height: Int) : super(width, height)
 
@@ -505,29 +511,22 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
                 initDownX = lastX
 
                 // if it isn't an ing state or default state
-                if (SwipeState.isSwipingToRefresh(state) || SwipeState.isSwipingToLoadMore(
-                        state
-                    ) ||
-                    SwipeState.isReleaseToRefresh(state) || SwipeState.isReleaseToLoadMore(
-                        state
-                    )
+                if (SwipeState.isSwipingToRefresh(state)
+                    || SwipeState.isSwipingToLoadMore(state)
+                    || SwipeState.isReleaseToRefresh(state)
+                    || SwipeState.isReleaseToLoadMore(state)
                 ) {
                     // abort autoScrolling, not trigger the method #autoScrollFinished()
                     autoScroller.abortIfRunning()
                     if (debug) {
-                        Log.i(
-                            TAG,
-                            "Another finger down, abort auto scrolling, let the new finger handle"
-                        )
+                        Log.i(TAG, "Another finger down, abort auto scrolling, let the new finger handle")
                     }
                 }
 
-                if (SwipeState.isSwipingToRefresh(state) || SwipeState.isReleaseToRefresh(
-                        state
-                    )
-                    || SwipeState.isSwipingToLoadMore(state) || SwipeState.isReleaseToLoadMore(
-                        state
-                    )
+                if (SwipeState.isSwipingToRefresh(state)
+                    || SwipeState.isReleaseToRefresh(state)
+                    || SwipeState.isSwipingToLoadMore(state)
+                    || SwipeState.isReleaseToLoadMore(state)
                 ) {
                     return true
                 }
@@ -542,8 +541,7 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
                 val xInitDiff = x - initDownX
                 lastY = y
                 lastX = x
-                val moved =
-                    Math.abs(yInitDiff) > Math.abs(xInitDiff) && Math.abs(yInitDiff) > touchSlop
+                val moved = abs(yInitDiff) > abs(xInitDiff) && abs(yInitDiff) > touchSlop
                 val triggerCondition =
                     // refresh trigger condition
                     yInitDiff > 0 && moved && onCheckCanRefresh() ||
@@ -639,13 +637,30 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
     private fun moveView(yDiff: Float): Boolean {
         if (SwipeState.isStateDefault(state)) {
             if (yDiff > 0 && onCheckCanRefresh()) {
+                fingerScroll(yDiff)
                 refreshCallback.onPrepare()
                 setState(SwipeState.STATE_SWIPING_TO_REFRESH)
             } else if (yDiff < 0 && onCheckCanLoadMore()) {
                 loadMoreCallback.onPrepare()
                 setState(SwipeState.STATE_SWIPING_TO_LOAD_MORE)
             }
-        } else if (SwipeState.isRefreshState(state)) {
+        } else if (SwipeState.isSwipingToRefresh(state) || SwipeState.isReleaseToRefresh(state)) {
+            fingerScroll(yDiff)
+            if (targetOffset >= refreshTriggerOffset) {
+                setState(SwipeState.STATE_RELEASE_TO_REFRESH)
+            } else {
+                setState(SwipeState.STATE_SWIPING_TO_REFRESH)
+            }
+        } else if (SwipeState.isSwipingToLoadMore(state) || SwipeState.isReleaseToLoadMore(state)) {
+            fingerScroll(yDiff)
+            if (-targetOffset >= loadMoreTriggerOffset) {
+                setState(SwipeState.STATE_RELEASE_TO_LOAD_MORE)
+            } else {
+                setState(SwipeState.STATE_SWIPING_TO_LOAD_MORE)
+            }
+        }
+
+        if (SwipeState.isRefreshState(state)) {
             if (targetOffset <= 0) {
                 setState(SwipeState.STATE_DEFAULT)
                 fixCurrentStatusLayout()
@@ -659,29 +674,6 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
             }
         }
 
-        if (SwipeState.isRefreshState(state)) {
-            if (SwipeState.isSwipingToRefresh(state)
-                || SwipeState.isReleaseToRefresh(state)
-            ) {
-                if (targetOffset >= refreshTriggerOffset) {
-                    setState(SwipeState.STATE_RELEASE_TO_REFRESH)
-                } else {
-                    setState(SwipeState.STATE_SWIPING_TO_REFRESH)
-                }
-                fingerScroll(yDiff)
-            }
-        } else if (SwipeState.isLoadMoreState(state)) {
-            if (SwipeState.isSwipingToLoadMore(state)
-                || SwipeState.isReleaseToLoadMore(state)
-            ) {
-                if (-targetOffset >= loadMoreTriggerOffset) {
-                    setState(SwipeState.STATE_RELEASE_TO_LOAD_MORE)
-                } else {
-                    setState(SwipeState.STATE_SWIPING_TO_LOAD_MORE)
-                }
-                fingerScroll(yDiff)
-            }
-        }
         return true
     }
 
@@ -1075,8 +1067,8 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
                 targetOffset = 0
                 headerOffset = 0
                 footerOffset = 0
-                layoutChildren()
-                invalidate()
+//                layoutChildren()
+//                invalidate()
             }
             SwipeState.isLoadingMore(state) -> {
                 targetOffset = -(loadMoreTriggerOffset + 0.5f).toInt()
@@ -1114,16 +1106,17 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
         } else if (loadMoreFinalDragOffset >= loadMoreTriggerOffset && -tmpTargetOffset > loadMoreFinalDragOffset) {
             yScrolled = -loadMoreFinalDragOffset - targetOffset
         }
+        updateScroll(yScrolled)
 
         if (SwipeState.isRefreshState(state)) {
             refreshCallback.onMove(targetOffset, isComplete = false, automatic = false)
         } else if (SwipeState.isLoadMoreState(state)) {
             loadMoreCallback.onMove(targetOffset, isComplete = false, automatic = false)
         }
-        updateScroll(yScrolled)
     }
 
     private fun autoScroll(yScrolled: Float) {
+        updateScroll(yScrolled)
         when {
             SwipeState.isSwipingToRefresh(state) ->
                 refreshCallback.onMove(targetOffset, isComplete = false, automatic = true)
@@ -1138,7 +1131,6 @@ open class SwipeToLoadLayout @JvmOverloads constructor(
             SwipeState.isLoadingMore(state) ->
                 loadMoreCallback.onMove(targetOffset, isComplete = true, automatic = true)
         }
-        updateScroll(yScrolled)
     }
 
     /**
